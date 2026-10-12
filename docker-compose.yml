@@ -1,0 +1,57 @@
+x-backend: &backend
+  build: .
+  image: plan-backend
+  environment:
+    POSTGRES_HOST: postgres
+    CLICKHOUSE_HOST: clickhouse
+  depends_on:
+    postgres:
+      condition: service_healthy
+    clickhouse:
+      condition: service_healthy
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: plan
+      POSTGRES_USER: plan
+      POSTGRES_PASSWORD: plan
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U plan -d plan"]
+      interval: 5s
+      retries: 10
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.8
+    environment:
+      CLICKHOUSE_DB: plan
+      CLICKHOUSE_USER: plan
+      CLICKHOUSE_PASSWORD: plan
+    ports:
+      - "8321:8123"
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--user", "plan", "--password", "plan", "-q", "SELECT 1"]
+      interval: 5s
+      retries: 10
+
+  # Одноразовая задача: миграции Postgres и схема ClickHouse
+  migrate:
+    <<: *backend
+    command: ["python", "manage.py", "migrate_all"]
+    restart: "no"
+
+  backend:
+    <<: *backend
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/', timeout=5)"]
+      interval: 10s
+      start_period: 15s
+      retries: 3
+    depends_on:
+      migrate:
+        condition: service_completed_successfully

@@ -1,0 +1,56 @@
+[project]
+name = "test-project"
+version = "0.1.0"
+description = "Backend / Plan: сохранение объема работ ЗМК"
+requires-python = ">=3.11"
+dependencies = [
+    "Django>=5.0,<5.2",
+    "djangorestframework>=3.15,<4",
+    "psycopg[binary]>=3.1,<4",
+    "clickhouse-connect>=0.7,<1",
+    "python-dotenv>=1.0,<2",
+    "drf-spectacular>=0.27,<1",
+    "structlog>=24.1,<26",
+    "gunicorn>=22,<25",
+    "uvicorn-worker>=0.2,<1",
+    "whitenoise>=6,<7",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8,<9",
+    "pytest-django>=4.9,<5",
+    "ruff>=0.17,<1",
+    "pre-commit>=4,<5",
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "backend.settings"
+python_files = ["test_*.py"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+extend-exclude = ["plan/migrations"]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle
+    "W",
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # bugbear
+    "UP",   # pyupgrade
+    "DJ",   # django
+    "SIM",
+    "RUF",
+]
+ignore = [
+    "RUF001", # кириллица в строках и комментариях
+    "RUF002",
+    "RUF003",
+    "RUF012", # Meta.constraints и атрибуты DRF-view — стандартный стиль Django
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["backend", "plan"]

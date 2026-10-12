@@ -1,0 +1,10 @@
+Django>=5.0,<5.2
+djangorestframework>=3.15,<4
+psycopg[binary]>=3.1,<4
+clickhouse-connect>=0.7,<1
+python-dotenv>=1.0,<2
+drf-spectacular>=0.27,<1
+structlog>=24.1,<26
+gunicorn>=22,<25
+uvicorn-worker>=0.2,<1
+whitenoise>=6,<7
